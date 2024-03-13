@@ -17,7 +17,7 @@ datetime format (e.g. \code{\%Y-\%m-\%d \%H:\%M:\%S}).}
 the dates specified in \code{force} in which a missed jump is looked for.}
 }
 \description{
-\code{forejump} forces a jump (positive or negative) in the dendrometer
+\code{forcejump} forces a jump (positive or negative) in the dendrometer
   data that was not corrected during the processing.
 }
 \keyword{internal}

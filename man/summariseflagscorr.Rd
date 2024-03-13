@@ -4,13 +4,13 @@
 \alias{summariseflagscorr}
 \title{Summarise Flags}
 \usage{
-summariseflagscorr(df, reverse = NULL, force = NULL, delete = NULL)
+summariseflagscorr(df, force = NULL, delete = NULL, force.now = NULL)
 }
 \arguments{
 \item{df}{input \code{data.frame}.}
 }
 \description{
 \code{summariseflagscorr} appends the flags of the corrections to the
-  existing flags.
+  existing flags (except for reverse).
 }
 \keyword{internal}

@@ -9,7 +9,9 @@ corr_dendro_L2(
   dendro_L2,
   reverse = NULL,
   force = NULL,
+  jump = NULL,
   delete = NULL,
+  force.now = NULL,
   series = NULL,
   n_days = 5,
   plot = TRUE,
@@ -42,6 +44,12 @@ all dendrometer data will be deleted (i.e. 4 dates will result in two
 periods: 1-2 and 3-4 in which data is deleted). Dates need to be in the
 same standard date or datetime format
 (e.g. \code{\%Y-\%m-\%d \%H:\%M:\%S}).}
+
+\item{force.now}{character vector: specify the specific date where a jump
+will be corrected. There's no period of following days where treenetproc
+will look for the largest difference, but the force will be done in the
+given date and time specified in \code{force.now}. Dates need to be in a
+standard date or datetime format (e.g. \code{\%Y-\%m-\%d \%H:\%M:\%S}).}
 
 \item{series}{character, specify the name of a single dendrometer series
 for which changes should be made. Data of other series is left unchanged.
@@ -77,6 +85,7 @@ The function returns a \code{data.frame} with corrected \code{L2}
 corr_dendro_L2(dendro_L1 = dendro_data_L1, dendro_L2 = dendro_data_L2,
                reverse = 59:61, force = "2013-08-12",
                delete = c("2013-08-01", "2013-08-04"),
+               force.now = "2013-08-12 20:00:00",
                series = "site-1_dendro-3", plot_export = FALSE,
                plot_name = "corr_L2_plot")
 
