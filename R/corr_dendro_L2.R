@@ -23,6 +23,11 @@
 #'   periods: 1-2 and 3-4 in which data is deleted). Dates need to be in the
 #'   same standard date or datetime format
 #'   (e.g. \code{\%Y-\%m-\%d \%H:\%M:\%S}).
+#' @param force.now character vector: specify the specific date where a jump
+#'   will be corrected. There's no period of following days where treenetproc
+#'   will look for the largest difference, but the force will be done in the
+#'   given date and time specified in \code{force.now}. Dates need to be in a
+#'   standard date or datetime format (e.g. \code{\%Y-\%m-\%d \%H:\%M:\%S}).
 #' @param series character, specify the name of a single dendrometer series
 #'   for which changes should be made. Data of other series is left unchanged.
 #'   Not needed if only a single series is provided.
@@ -45,11 +50,13 @@
 #' corr_dendro_L2(dendro_L1 = dendro_data_L1, dendro_L2 = dendro_data_L2,
 #'                reverse = 59:61, force = "2013-08-12",
 #'                delete = c("2013-08-01", "2013-08-04"),
+#'                force.now = "2013-08-12 20:00:00",
 #'                series = "site-1_dendro-3", plot_export = FALSE,
 #'                plot_name = "corr_L2_plot")
 #'
 corr_dendro_L2 <- function(dendro_L1 = NULL, dendro_L2, reverse = NULL,
-                           force = NULL, delete = NULL, series = NULL,
+                           force = NULL, jump = NULL, delete = NULL,
+                           force.now = NULL, series = NULL,
                            n_days = 5, plot = TRUE, plot_export = TRUE,
                            plot_name = "corr_L2_plot",
                            tz = "UTC") {
@@ -91,13 +98,17 @@ corr_dendro_L2 <- function(dendro_L1 = NULL, dendro_L2, reverse = NULL,
     force <- check_datevec(datevec = force, datevec_name = "force", tz = tz)
     check_date_period(datevec = force, datevec_name = "force", df = df)
   }
+  if (length(force.now) != 0) {
+    force.now <- check_datevec(datevec = force.now, datevec_name = "force.now", tz = tz)
+    check_date_period(datevec = force.now, datevec_name = "force.now", df = df)
+  }
   if (length(delete) != 0) {
     delete <- check_datevec(datevec = delete, datevec_name = "delete", tz = tz)
     check_date_period(datevec = delete, datevec_name = "delete", df = df)
     check_delete(delete)
   }
-  if (length(reverse) == 0 & length(force) == 0 & length(delete) == 0) {
-    stop("provide at least 'reverse', 'force' or 'delete'.")
+  if (length(reverse) == 0 & length(force) == 0 & length(force.now) == 0 & length(delete) == 0) {
+    stop("provide at least 'reverse', 'force', 'force.now' or 'delete'.")
   }
   if (length(dendro_L1) != 0) {
     check_data_L1(data_L1 = dendro_L1)
@@ -123,22 +134,25 @@ corr_dendro_L2 <- function(dendro_L1 = NULL, dendro_L2, reverse = NULL,
                                 reverse = reverse, tz = tz)
     df <- reverse_list[[1]]
     diff_old <- reverse_list[[2]]
-    
+
     # unset previous fill / out / jump flags and set the 'rev' flag
     df <- revflags(df = df)
   }
-  
+
   if (length(force) != 0) {
     df <- forcejump(data_L2 = df, force = force, n_days = n_days)
   }
-  
+  if (length(force.now) != 0) {
+    df <- forcejumpnow(data_L2 = df, force.now = force.now)
+  }
+
   if (length(delete) != 0) {
     df <- deleteperiod(df = df, delete = delete)
   }
 
   df <- calcmax(df = df)
   df <- calctwdgro(df = df, tz = tz)
-  df <- summariseflagscorr(df = df, force = force, delete = delete)
+  df <- summariseflagscorr(df = df, force = force, force.now = force.now, delete = delete)
 
   df <- df %>%
     dplyr::mutate(gro_yr = ifelse(is.na(value), NA, gro_yr)) %>%
@@ -175,6 +189,17 @@ corr_dendro_L2 <- function(dendro_L1 = NULL, dendro_L2, reverse = NULL,
     }
     if (length(force) != 0) {
       month_force <- format(force, format = "%Y-%m", tz = tz)
+      month_force <- paste0(unique(month_force), "-01")
+      data_L1 <- data_L1 %>%
+        dplyr::mutate(month_forc = ifelse(month %in% month_force, 1, 0)) %>%
+        dplyr::rowwise() %>%
+        dplyr::mutate(month_plot = sum(month_plot, month_forc)) %>%
+        dplyr::ungroup() %>%
+        dplyr::mutate(month_plot = ifelse(month_plot >= 1, 1, 0)) %>%
+        dplyr::select(-month_forc)
+    }
+    if (length(force.now) != 0) { # add to output plot the manually corrected months
+      month_force <- format(force.now, format = "%Y-%m", tz = tz)
       month_force <- paste0(unique(month_force), "-01")
       data_L1 <- data_L1 %>%
         dplyr::mutate(month_forc = ifelse(month %in% month_force, 1, 0)) %>%

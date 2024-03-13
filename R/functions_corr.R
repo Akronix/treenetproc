@@ -87,9 +87,59 @@ reversecorr <- function(data_L1, data_L2, reverse, tz) {
 }
 
 
+#'  \code{forcejumpnow} forces a jump in data at specific given date
+#'
+#' @inheritParams plot_proc_L2
+#' @inheritParams corr_dendro_L2
+#'
+#' @keywords internal
+#'
+forcejumpnow <- function(data_L2, force.now) {
+
+  # creates diff vector
+  diff <- data_L2 %>%
+    dplyr::mutate(value = ifelse(grepl("fill", flags), NA, value)) %>%
+    dplyr::filter(!is.na(value)) %>%
+    dplyr::mutate(diff = c(NA, diff(value, lag = 1))) %>%
+    dplyr::select(ts, diff) %>%
+    dplyr::right_join(., data_L2, by = "ts") %>%
+    dplyr::arrange(ts) %>%
+    dplyr::select(diff) %>%
+    unlist(., use.names = FALSE) # This line together with the previous one creates a vector from the diff column
+
+  # set some variables
+  val <- data_L2$value
+  ts <- data_L2$ts
+  flag <- as.vector(rep(FALSE, nrow(data_L2)), mode = "logical")
+
+  # for every date in the force.now vector
+  for (f in 1:length(force.now)) {
+
+    # get diff value right before the given date
+    pos_diff <- which(ts == force.now[f])
+    print(pos_diff)
+    val_diff <- diff[pos_diff]
+    print(val_diff)
+
+    # substract the value to all next dates
+    val[pos_diff:length(val)] <- val[pos_diff:length(val)] - val_diff
+
+    # flag modified data
+    flag[pos_diff] <- TRUE
+  }
+
+  # modify original data
+  data_L2 <- data_L2 %>%
+    dplyr::mutate(value = val) %>%
+    dplyr::mutate(flagforcejump = flag)
+
+  return(data_L2)
+}
+
+
 #' Force Jump in Data
 #'
-#' \code{forejump} forces a jump (positive or negative) in the dendrometer
+#' \code{forcejump} forces a jump (positive or negative) in the dendrometer
 #'   data that was not corrected during the processing.
 #'
 #' @param n_days numeric, specifies the length of the period (in days) after
@@ -188,24 +238,23 @@ deleteperiod <- function(df, delete) {
 #' @keywords internal
 #'
 revflags <- function(df) {
-    
+
   # create flags vector appeding "rev" flag when it's an item where there's a reversed change
   flags <- paste(df$flags, ifelse(df$flagreversecorr, paste(df$flags,"rev",sep=", "), df$flags), sep=", ")
-  
-  
+
+
   # remove flags of changes that are to be reversed
   flags <- ifelse(grepl("(.*out|.*fill|.*jump)(.*rev)", flags, perl = TRUE),
                     gsub("out[[:digit:]]*,[[:blank:]]*|fill,[[:blank:]]*|jump[[:digit:]]*,[[:blank:]]*",
                         "",
                         flags),
                     flags)
-                
+
   df$flags <- flags
 
   return(df)
-  
-}
 
+}
 
 
 #' Summarise Flags
@@ -217,15 +266,17 @@ revflags <- function(df) {
 #'
 #' @keywords internal
 #'
-summariseflagscorr <- function(df, force = NULL, delete = NULL) {
+summariseflagscorr <- function(df, force = NULL, delete = NULL,
+                               force.now = NULL){
 
   list_flags <- vector("list", length = 2)
 
-  if (length(force) != 0) {
+  if (length(force) != 0 | length(force.now) != 0) {
     list_flags[[1]] <- ifelse(df$flagforcejump, "fjump", NA)
   } else {
     list_flags[[1]] <- NA
   }
+
   if (length(delete) != 0) {
     list_flags[[2]] <- ifelse(df$flagdelete, "del", NA)
   } else {
@@ -235,7 +286,7 @@ summariseflagscorr <- function(df, force = NULL, delete = NULL) {
   flags <- do.call("paste", c(list_flags, sep = ", "))
   list_all <- list(df$flags, flags)
   flags <- do.call("paste", c(list_all, sep = ", "))
- 
+
   # remove all other flags if value was deleted
   flags <- gsub(".*del", "del", flags)
   # remove NA's and single commas
