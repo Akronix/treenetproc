@@ -9,7 +9,6 @@ corr_dendro_L2(
   dendro_L2,
   reverse = NULL,
   force = NULL,
-  jump = NULL,
   delete = NULL,
   force.now = NULL,
   series = NULL,

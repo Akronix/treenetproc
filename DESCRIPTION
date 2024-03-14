@@ -1,14 +1,17 @@
 Package: treenetproc
 Type: Package
 Title: Clean, Process and Visualize Dendrometer Data
-Version: 0.1.4
-Date: 2019-06-17
+Version: 0.2.0
+Date: 2024-03-14
 Authors@R: c(person("Matthias", "Haeni", email = "matthias.haeni@wsl.ch",
     role = c("aut", "cre")),
     person("Simon", "Knüsel", email = "simon.knuesel@wsl.ch",
     role = c("aut")),
     person("Micah", "Wilhelm", email = "micah.wilhelm@wsl.ch",
-    role = c("ctb")))
+    role = c("ctb")),
+    person("Abel", "Serrano Juste", email = "akronix5@gmail.com",
+    role = c("ctb"))
+    )
 Description: The package cleans, processes and visualises highly resolved 
     time series of dendrometer data. In two steps, raw dendrometer data is 
     aligned to regular time intervals and cleaned. Further, the package offers
@@ -20,6 +23,7 @@ Depends: R (>= 3.5.0)
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
+LazyDataCompression:xz
 RoxygenNote: 7.2.3
 Imports: 
     dplyr (>= 0.7.8),

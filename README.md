@@ -46,7 +46,7 @@ installing the package:
 ``` r
 # install.packages("devtools")
 library(devtools)
-devtools::install_github("treenet/treenetproc", build_vignettes = TRUE)
+devtools::install_github("akronix/treenetproc", build_vignettes = TRUE)
 ```
 
 <br>
