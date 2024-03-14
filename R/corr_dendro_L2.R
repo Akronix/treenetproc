@@ -142,12 +142,13 @@ corr_dendro_L2 <- function(dendro_L1 = NULL, dendro_L2, reverse = NULL,
   if (length(force) != 0) {
     df <- forcejump(data_L2 = df, force = force, n_days = n_days)
   }
-  if (length(force.now) != 0) {
-    df <- forcejumpnow(data_L2 = df, force.now = force.now)
-  }
 
   if (length(delete) != 0) {
     df <- deleteperiod(df = df, delete = delete)
+  }
+
+  if (length(force.now) != 0) {
+    df <- forcejumpnow(data_L2 = df, force.now = force.now)
   }
 
   df <- calcmax(df = df)
