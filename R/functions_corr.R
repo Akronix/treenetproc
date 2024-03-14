@@ -96,6 +96,13 @@ reversecorr <- function(data_L1, data_L2, reverse, tz) {
 #'
 forcejumpnow <- function(data_L2, force.now) {
 
+  getValDiff <- function(diff, pos_diff) {
+    if (pos_diff == length(diff))
+      return(NA)
+    else
+      return(ifelse(is.na(diff[pos_diff]), getValDiff(diff, pos_diff+1), diff[pos_diff] ))
+  }
+
   # creates diff vector
   diff <- data_L2 %>%
     dplyr::mutate(value = ifelse(grepl("fill", flags), NA, value)) %>%
@@ -116,10 +123,8 @@ forcejumpnow <- function(data_L2, force.now) {
   for (f in 1:length(force.now)) {
 
     # get diff value right before the given date
-    pos_diff <- which(ts == force.now[f])
-    print(pos_diff)
-    val_diff <- diff[pos_diff]
-    print(val_diff)
+    pos_diff <- which(ts == force.now[f]) + 1
+    val_diff <- getValDiff(diff, pos_diff)
 
     # substract the value to all next dates
     val[pos_diff:length(val)] <- val[pos_diff:length(val)] - val_diff
