@@ -55,7 +55,7 @@
 #'                plot_name = "corr_L2_plot")
 #'
 corr_dendro_L2 <- function(dendro_L1 = NULL, dendro_L2, reverse = NULL,
-                           force = NULL, jump = NULL, delete = NULL,
+                           force = NULL, delete = NULL,
                            force.now = NULL, series = NULL,
                            n_days = 5, plot = TRUE, plot_export = TRUE,
                            plot_name = "corr_L2_plot",
