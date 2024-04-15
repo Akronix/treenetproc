@@ -187,22 +187,19 @@ deleteperiod <- function(df, delete) {
 #' @keywords internal
 #'
 revflags <- function(df) {
-    
-  # create flags vector appeding "rev" flag when it's an item where there's a reversed change
-  flags <- paste(df$flags, ifelse(df$flagreversecorr, paste(df$flags,"rev",sep=", "), df$flags), sep=", ")
-  
-  
-  # remove flags of changes that are to be reversed
-  flags <- ifelse(grepl("(.*out|.*fill|.*jump)(.*rev)", flags, perl = TRUE),
-                    gsub("out[[:digit:]]*,[[:blank:]]*|fill,[[:blank:]]*|jump[[:digit:]]*,[[:blank:]]*",
-                        "",
-                        flags),
-                    flags)
-                
-  df$flags <- flags
+  # clear previous treenetproc flags and append "rev" flag
+  clearprevflags <- function (original_flags) {
+    new_flags <-gsub(".*out[[:digit:]]*|.*fill|.*jump[[:digit:]]*",
+         "",
+         original_flags)
+    return (ifelse(new_flags == "", "rev", paste(new_flags, "rev", sep=", ")))
+  }
+
+  # substitute flags vector appeding "rev" flag when it's an item where there's a reversed change
+  df$flags <- ifelse(df$flagreversecorr, clearprevflags(df$flags), df$flags)
 
   return(df)
-  
+
 }
 
 
@@ -234,9 +231,12 @@ summariseflagscorr <- function(df, force = NULL, delete = NULL) {
   flags <- do.call("paste", c(list_flags, sep = ", "))
   list_all <- list(df$flags, flags)
   flags <- do.call("paste", c(list_all, sep = ", "))
- 
-  # remove all other flags if value was deleted
-  flags <- gsub(".*del", "del", flags)
+
+  # if value deleted:
+  # if it was reversed keep the "rev, del" flags, otherwise remove all other flags and append "del" flag
+  flags <- ifelse(grepl(".*rev.*del", flags),
+              "rev, del",
+              gsub(".*del", "del", flags))
   # remove NA's and single commas
   flags <- gsub(", NA|NA, |^, ", "", flags)
   flags <- ifelse(flags %in% c("NA", ""), NA, flags)
