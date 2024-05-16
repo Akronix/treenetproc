@@ -57,19 +57,25 @@ print_growth_statistics <- function(data_plot, reso, tz) {
 
 #' Re-calculate the growth variables: max, twd and gro_yr
 #'
-#' \code{recalc_growth_variables}
+#' \code{recalc_growth_variables} calculates the growth variables: max, twd and
+#' gro_yr from the \code{value} column of L2 dendrometer data, and optionally
+#' plot the gro_yr plot and the growth statistics. \cr
+#' This function is useful, for instance, if you has changed the initial moment
+#' of measure (for example, by filtering the data), and you want to recalculate
+#' the growing stats or phase stats; or you you want to recalculate the twd, max
+#' or gro_yr values.
 #'
 #' @param dendro_L2 input \code{data.frame} containing cleaned \code{L2}
-#'   dendrometer data (obtained from functions \code{\link{proc_dendro_L2}}
-#'   or \code{\link{corr_dendro_L2}}).
+#'   dendrometer data (obtained from functions \code{\link{proc_dendro_L2}} or
+#'   \code{\link{corr_dendro_L2}}). Note that it should contain (at least) the
+#'   following columns: series, ts, value, max, twd, gro_yr
 #'
 #' @inheritParams proc_dendro_L2
 #'
 #' @return The function returns a \code{data.frame} with the \code{treenetproc}
-#' growth output (max, twd and gro_yr) recalculated. It leaves the other columns
-#' unmodified. This function is useful if you has changed the initial moment of
-#' measure (for instance, by filtering the data) and you want to recalculate the
-#' growing stats or phase stats, among others.
+#'   growth output (max, twd and gro_yr) recalculated and the treenetproc
+#'   version in use appended. It leaves the other columns unmodified.
+#'
 #'
 #' @seealso \code{\link{grow_seas}} to calculate the growing season variables
 #'    from the dendro_L2 data, which is updated with this function.

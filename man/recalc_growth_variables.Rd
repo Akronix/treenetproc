@@ -6,33 +6,38 @@
 \usage{
 recalc_growth_variables(
   dendro_L2,
-  tz = "UTC",
   plot = FALSE,
-  plot_export = FALSE
+  plot_export = FALSE,
+  tz = "UTC"
 )
 }
 \arguments{
 \item{dendro_L2}{input \code{data.frame} containing cleaned \code{L2}
-dendrometer data (obtained from functions \code{\link{proc_dendro_L2}}
-or \code{\link{corr_dendro_L2}}).}
-
-\item{tz}{specify the desired time zone. Default is \code{"UTC"}.}
+dendrometer data (obtained from functions \code{\link{proc_dendro_L2}} or
+\code{\link{corr_dendro_L2}}). Note that it should contain (at least) the
+following columns: series, ts, value, max, twd, gro_yr}
 
 \item{plot}{logical, specify whether the changes that occurred during data
 cleaning should be plotted.}
 
 \item{plot_export}{logical, specifies whether the plots are exported as a
 \code{PDF} file to the working directory or are plotted in the console.}
+
+\item{tz}{specify the desired time zone. Default is \code{"UTC"}.}
 }
 \value{
 The function returns a \code{data.frame} with the \code{treenetproc}
-growth output (max, twd and gro_yr) recalculated. It leaves the other columns
-unmodified. This function is useful if you has changed the initial moment of
-measure (for instance, by filtering the data) and you want to recalculate the
-growing stats or phase stats, among others.
+  growth output (max, twd and gro_yr) recalculated and the treenetproc
+  version in use appended. It leaves the other columns unmodified.
 }
 \description{
-\code{recalc_growth_variables}
+\code{recalc_growth_variables} calculates the growth variables: max, twd and
+gro_yr from the \code{value} column of L2 dendrometer data, and optionally
+plot the gro_yr plot and the growth statistics. \cr
+This function is useful, for instance, if you has changed the initial moment
+of measure (for example, by filtering the data), and you want to recalculate
+the growing stats or phase stats; or you you want to recalculate the twd, max
+or gro_yr values.
 }
 \examples{
 recalc_growth_variables(dendro_L2 = dendro_data_L2, tz = 'Europe/Madrid')
