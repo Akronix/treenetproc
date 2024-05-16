@@ -1,4 +1,6 @@
-print_growth_statistics <- function(data_plot, reso, tz) {
+print_growth_statistics <- function(df, reso, tz) {
+
+  data_plot <- df
 
   series_no <- first(data_plot$series)
 
@@ -101,39 +103,53 @@ recalc_growth_variables <- function(dendro_L2,
   reso <- reso_check_L1(df = df, tz = tz)
   # passenv$reso <- reso # <- in case we wanted to have reso in the environment
 
-  # remove leading and trailing NA's
-  na_list <- remove_lead_trail_na(df = df)
-  df <- na_list[[1]]
-  lead_trail_na <- na_list[[2]]
+  # iterate over every series on the dataframe
+  series_vec <- unique(df$series)
+  list_series <- vector("list", length = length(series_vec))
+  df_all <- df
+  for (s in 1:length(series_vec)) {
+    df <- df_all %>% dplyr::filter(series == series_vec[s])
 
-  df <- calcmax(df = df)
-  df <- calctwdgro(df = df, tz = tz)
+    # remove leading and trailing NA's
+    na_list <- remove_lead_trail_na(df = df)
+    df <- na_list[[1]]
+    lead_trail_na <- na_list[[2]]
 
-  df <- df %>%
-    dplyr::mutate(gro_yr = ifelse(is.na(value), NA, gro_yr)) %>%
-    dplyr::mutate(twd = ifelse(is.na(value), NA, twd)) %>%
-    dplyr::mutate(max = ifelse(is.na(value), NA, max)) %>%
-    dplyr::mutate(
-      version = utils::packageDescription("treenetproc",
-                                          fields = "Version", drop = TRUE))
-  # append leading and trailing NA's
-  df <- append_lead_trail_na(df = df, na = lead_trail_na)
+    df.aux <- df # do a copy to prevent changin previous data by external functions
+    df.aux <- calcmax(df = df.aux)
+    df.aux <- calctwdgro(df = df.aux, tz = tz)
 
-  # generate pdf report
-  if (plot) {
-    series <- first(df$series)
-    print("plotting new growth statistics...")
-    if (plot_export) {
-      grDevices::pdf(paste0("recalc_growth_", series, ".pdf"),
-                     width = 8.3, height = 11.7)
+    df <- df %>%
+      dplyr::mutate(gro_yr = ifelse(is.na(value), NA, df.aux$gro_yr)) %>%
+      dplyr::mutate(twd = ifelse(is.na(value), NA, df.aux$twd)) %>%
+      dplyr::mutate(max = ifelse(is.na(value), NA, df.aux$max)) %>%
+      dplyr::mutate(
+        version = utils::packageDescription("treenetproc",
+                                            fields = "Version", drop = TRUE))
+    # append leading and trailing NA's
+    df <- append_lead_trail_na(df = df, na = lead_trail_na)
+
+    # generate pdf report
+    if (plot) {
+      series <- first(df$series)
+      print("plotting new growth statistics...")
+      if (plot_export) {
+        grDevices::pdf(paste0("recalc_growth_", series, ".pdf"),
+                       width = 8.3, height = 11.7)
+      }
+
+      print_growth_statistics(df, reso, tz)
+
+      if (plot_export) {
+        grDevices::dev.off()
+      }
     }
 
-    print_growth_statistics(df, reso, tz)
+    list_series[[s]] <- df
 
-    if (plot_export) {
-      grDevices::dev.off()
-    }
   }
+
+  df <- dplyr::bind_rows(list_series)
 
   return(df)
 }
