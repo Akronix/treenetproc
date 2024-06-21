@@ -1,4 +1,4 @@
-Package: treenetproc
+Package: treenetproc.ipe
 Type: Package
 Title: Clean, Process and Visualize Dendrometer Data
 Version: 0.2.1
@@ -19,7 +19,7 @@ Description: The package cleans, processes and visualises highly resolved
     growing season as well as several characteristics of shrinkage and 
     expansion phases. See the vignette 'Introduction to treenetproc' for 
     sample code and a demonstration of an exemplary workflow.
-Depends: R (>= 3.5.0)
+Depends: R (>= 4.0.0)
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
