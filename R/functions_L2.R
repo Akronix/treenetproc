@@ -271,6 +271,18 @@ calcflagmad <- function(df, reso, wnd = NULL, tol = 10, frost,
                                      na.rm = TRUE))
 
     mad <- stats::mad(df$diff_val[ran], na.rm = TRUE)
+
+    if (mad == 0) { # MAD can be 0 when more of the 50% has the same value, we fallback to MAE in such case
+      median <- stats::median(df$diff_val[ran], na.rm = TRUE)
+      mae <- mean(abs(df$diff_val[ran] - median), na.rm = TRUE)
+      if (mae != 0) {
+        mad <- mae
+      }
+      else { # if, for any improbable reason, MAE is 0, change it to 0.001
+        mad <- 0.001
+      }
+    }
+
     low <- q1 - tol * mad
     high <- q3 + tol * mad
 
