@@ -42,6 +42,8 @@ check_format <- function(df, input) {
 #'
 check_ts <- function(df, date_format, tz) {
 
+  is.POSIXct <- function(x) inherits(x, "POSIXct")
+
   if (!("ts" %in% colnames(df))) {
     stop("column with time stamps (named 'ts') is missing.")
   }
