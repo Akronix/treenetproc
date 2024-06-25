@@ -46,16 +46,17 @@ check_ts <- function(df, date_format, tz) {
     stop("column with time stamps (named 'ts') is missing.")
   }
 
-  ts <- as.character(df$ts)
-  ts <- as.POSIXct(ts, format = date_format, tz = tz)
+  if (!is.POSIXct(df$ts)) {
+      ts <- as.character(df$ts)
+      ts <- as.POSIXct(ts, format = date_format, tz = tz)
 
-  if (is.na(unique(ts)[1])) {
-    stop(paste("Date format in 'ts' not recognized. Please provide",
-               "'ts' in a valid format or specify a custom format in",
-               "'date_format'."))
+    if (is.na(unique(ts)[1])) {
+      stop(paste("Date format in 'ts' not recognized. Please provide",
+                 "'ts' in a valid format or specify a custom format in",
+                 "'date_format'."))
+    }
+    df$ts <- ts
   }
-
-  df$ts <- ts
 
   return(df)
 }
