@@ -1,3 +1,6 @@
+# treenetproc 0.2.3
+* Fixed a small bug that was deleting the `fjump` flag when it was near a delete function in corr_dendro_L2()
+
 # treenetproc 0.2.2
 * Fixed bug when data came with already formatted `ts` field in the input dendro data. Now, treenetproc skips the as.POSIXct() transformation of the input timestamp (ts) when is already formatted as datetime (POSIXct)
 
