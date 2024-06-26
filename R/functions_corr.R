@@ -123,20 +123,24 @@ forcejumpnow <- function(data_L2, force.now) {
   # set some variables
   val <- data_L2$value
   ts <- data_L2$ts
-  flag <- as.vector(rep(FALSE, nrow(data_L2)), mode = "logical")
+  if ('flagforcejump' %in% colnames(data_L2) && any(data_L2$flagforcejump)) { # if it already has one flagforcejump marked from a previous call to force.jump
+    flag <- data_L2$flagforcejump
+  } else {
+    flag <- as.vector(rep(FALSE, nrow(data_L2)), mode = "logical")
+  }
 
   # for every date in the force.now vector
   for (f in 1:length(force.now)) {
 
-    # get diff value right before the given date
+    # get diff value right after the given date
     pos_diff <- which(ts == force.now[f]) + 1
     val_diff <- getValDiff(diff, pos_diff)
 
     # substract the value to all next dates
     val[pos_diff:length(val)] <- val[pos_diff:length(val)] - val_diff
 
-    # flag modified data
-    flag[pos_diff] <- TRUE
+    # flag data on the given date:
+    flag[pos_diff - 1] <- TRUE
   }
 
   # modify original data
